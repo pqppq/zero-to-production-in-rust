@@ -13,9 +13,8 @@ pub struct FormData {
     name = "Adding a new subscriber",
     skip(form, db_pool),
     fields(
-        request_id = %Uuid::new_v4(),
-        email = %form.email,
-        name = %form.name,
+        subscriber_email = %form.email,
+        subscriber_name = %form.name,
     )
 )]
 pub async fn subscribe(form: web::Form<FormData>, db_pool: web::Data<PgPool>) -> HttpResponse {
