@@ -37,3 +37,6 @@ features = [
 	"chrono", # support for mappping SQL timestampz to the DateTime<T>
 	"migrate",
 ]
+
+[dev-dependencies]
+once_cell = "1"
