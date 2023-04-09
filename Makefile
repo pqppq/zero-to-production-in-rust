@@ -1,3 +1,5 @@
+run:
+	cargo run | jq
 watch:
 	cargo watch -x check -x test -x run
 coverage:
