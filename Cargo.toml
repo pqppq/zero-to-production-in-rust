@@ -38,6 +38,7 @@ features = [
 	"uuid",
 	"chrono", # support for mappping SQL timestampz to the DateTime<T>
 	"migrate",
+	"offline"
 ]
 
 [dev-dependencies]
