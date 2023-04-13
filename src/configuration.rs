@@ -7,19 +7,43 @@ use sqlx::{
 
 use crate::domain::SubscriberEmail;
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Clone)]
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
     pub email_client: EmailClientSettings,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Clone)]
 pub struct EmailClientSettings {
     pub base_url: String,
     pub sender_email: String,
     pub authorization_token: Secret<String>,
     pub timeout_milliseconds: u64,
+}
+
+#[derive(serde::Deserialize, Clone)]
+pub struct ApplicationSettings {
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub port: u16,
+    pub host: String,
+    pub base_url: String,
+}
+
+#[derive(serde::Deserialize, Clone)]
+pub struct DatabaseSettings {
+    pub username: String,
+    pub password: Secret<String>,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub port: u16,
+    pub host: String,
+    pub database_name: String,
+    pub require_ssl: bool,
+}
+
+pub enum Environment {
+    Local,
+    Production,
 }
 
 impl EmailClientSettings {
@@ -30,24 +54,6 @@ impl EmailClientSettings {
     pub fn timeout(&self) -> std::time::Duration {
         std::time::Duration::from_millis(self.timeout_milliseconds)
     }
-}
-
-#[derive(serde::Deserialize)]
-pub struct ApplicationSettings {
-    #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub port: u16,
-    pub host: String,
-}
-
-#[derive(serde::Deserialize)]
-pub struct DatabaseSettings {
-    pub username: String,
-    pub password: Secret<String>,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub port: u16,
-    pub host: String,
-    pub database_name: String,
-    pub require_ssl: bool,
 }
 
 impl DatabaseSettings {
@@ -70,11 +76,6 @@ impl DatabaseSettings {
         options.log_statements(tracing_log::log::LevelFilter::Trace);
         options
     }
-}
-
-pub enum Environment {
-    Local,
-    Production,
 }
 
 impl Environment {
