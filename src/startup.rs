@@ -1,6 +1,7 @@
 use crate::configuration::DatabaseSettings;
 use crate::configuration::Settings;
 use crate::email_client::EmailClient;
+use crate::routes::confirm;
 use crate::routes::{health_check, subscribe};
 use std::net::TcpListener;
 
@@ -53,10 +54,9 @@ impl Application {
         self.port
     }
 
-    pub async fn run_until_stopped(self) -> Result<(), std::io::Error >  {
+    pub async fn run_until_stopped(self) -> Result<(), std::io::Error> {
         self.server.await
     }
-
 }
 
 pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
@@ -69,7 +69,7 @@ pub fn run(
     listener: TcpListener,
     db_pool: PgPool,
     email_client: EmailClient,
-    base_url: String
+    base_url: String,
 ) -> Result<Server, std::io::Error> {
     let db_pool = Data::new(db_pool);
     let email_client = Data::new(email_client);
@@ -78,6 +78,7 @@ pub fn run(
             .wrap(TracingLogger::default())
             .route("/health_check", web::get().to(health_check))
             .route("/subscriptions", web::post().to(subscribe))
+            .route("/subscriptions/confirm", web::get().to(confirm))
             .app_data(db_pool.clone())
             .app_data(email_client.clone())
             .app_data(base_url.clone())
