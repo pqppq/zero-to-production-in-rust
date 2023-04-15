@@ -1,26 +1,22 @@
-use crate::configuration::DatabaseSettings;
-use crate::configuration::Settings;
+use crate::configuration::{DatabaseSettings, Settings};
 use crate::email_client::EmailClient;
-use crate::routes::confirm;
-use crate::routes::{health_check, subscribe};
-use std::net::TcpListener;
-
+use crate::routes::{confirm, health_check, subscribe};
 use actix_web::dev::Server;
 use actix_web::web::Data;
 use actix_web::{web, App, HttpServer};
 use sqlx::postgres::PgPoolOptions;
 use sqlx::PgPool;
+use std::net::TcpListener;
 use tracing_actix_web::TracingLogger;
 
 pub struct Application {
-    pub port: u16,
-    pub server: Server,
+    port: u16,
+    server: Server,
 }
 
 impl Application {
     pub async fn build(configuration: Settings) -> Result<Self, std::io::Error> {
         let connection_pool = get_connection_pool(&configuration.database);
-
         let sender_email = configuration
             .email_client
             .sender()
@@ -39,7 +35,6 @@ impl Application {
         );
         let listener = TcpListener::bind(address)?;
         let port = listener.local_addr().unwrap().port();
-
         let server = run(
             listener,
             connection_pool,
@@ -67,7 +62,7 @@ pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
 
 pub struct ApplicationBaseUrl(pub String);
 
-pub fn run(
+fn run(
     listener: TcpListener,
     db_pool: PgPool,
     email_client: EmailClient,
@@ -88,6 +83,5 @@ pub fn run(
     })
     .listen(listener)?
     .run();
-
     Ok(server)
 }
