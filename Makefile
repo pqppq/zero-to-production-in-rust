@@ -1,5 +1,5 @@
 run:
-	cargo run | jq
+	cargo run | npx bunyan
 watch:
 	cargo watch -x check -x test -x run | npx bunyan
 coverage:
