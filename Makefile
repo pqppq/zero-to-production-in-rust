@@ -1,7 +1,7 @@
 run:
 	cargo run | jq
 watch:
-	cargo watch -x check -x test -x run
+	cargo watch -x check -x test -x run | npx bunyan
 coverage:
 	cargo tarpaulin --ignore-tests
 lint:
