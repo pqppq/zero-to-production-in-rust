@@ -75,7 +75,7 @@ async fn newsletters_are_deliverd_to_confirmed_subscribers() {
     Mock::given(path("/email"))
         .and(method("POST"))
         .respond_with(ResponseTemplate::new(200))
-        // .expect(1)
+        .expect(1)
         .mount(&app.email_server)
         .await;
 
