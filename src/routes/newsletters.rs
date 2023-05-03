@@ -47,28 +47,20 @@ struct ConfirmedSubscriber {
 async fn get_confirmed_subscribers(
     pool: &PgPool,
 ) -> Result<Vec<Result<ConfirmedSubscriber, anyhow::Error>>, anyhow::Error> {
-    struct Row {
-        email: String,
-    }
-
-    let rows = sqlx::query_as!(
-        Row,
+    let confirmed_subscribers = sqlx::query!(
         r#"
         SELECT email FROM subscriptions
         WHERE status = 'confirmed'
         "#,
     )
     .fetch_all(pool)
-    .await?;
-
-    // map into the domain type
-    let confirmed_subscribers = rows
-        .into_iter()
-        .map(|r| match SubscriberEmail::parse(r.email) {
-            Ok(email) => Ok(ConfirmedSubscriber { email }),
-            Err(error) => Err(anyhow::anyhow!(error)),
-        })
-        .collect();
+    .await?
+    .into_iter()
+    .map(|r| match SubscriberEmail::parse(r.email) {
+        Ok(email) => Ok(ConfirmedSubscriber { email }),
+        Err(error) => Err(anyhow::anyhow!(error)),
+    })
+    .collect();
 
     Ok(confirmed_subscribers)
 }
@@ -88,7 +80,7 @@ pub async fn publish_newsletter(
                         &body.title,
                         &body.content.html,
                         &body.content.text,
-                               )
+                    )
                     .await
                     .with_context(|| {
                         format!("Failed to send newsletter issue to {}", subscriber.email)
@@ -96,9 +88,9 @@ pub async fn publish_newsletter(
             }
             Err(error) => {
                 tracing::warn!(
-                    error.cause_chain = ?error,
-                    "Skipping a confirmed subscriber. Their stored contact details are invalid."
-                              );
+                error.cause_chain = ?error,
+                "Skipping a confirmed subscriber. Their stored contact details are invalid."
+                          );
             }
         }
     }
