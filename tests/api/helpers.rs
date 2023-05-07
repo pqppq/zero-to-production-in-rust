@@ -6,6 +6,8 @@ use wiremock::MockServer;
 use zero2prod::configuration::{get_configuration, DatabaseSettings};
 use zero2prod::startup::{get_connection_pool, Application};
 use zero2prod::telemetry::{get_subscriber, init_subscriber};
+use argon2::password_hash::SaltString;
+use argon2::{Argon2, PasswordHasher};
 
 // Ensure that the `tracing` stack is only initialised once using `once_cell`
 static TRACING: Lazy<()> = Lazy::new(|| {
@@ -41,15 +43,6 @@ pub struct ConfirmationLinks {
 }
 
 impl TestApp {
-    pub async fn test_user(&self) -> (String, String) {
-        let row = sqlx::query!("SELECT username, password_hash FROM users LIMIT 1")
-            .fetch_one(&self.db_pool)
-            .await
-            .expect("Failed to create test users");
-
-        (row.username, row.password_hash)
-    }
-
     pub async fn post_subscriptions(&self, body: String) -> reqwest::Response {
         reqwest::Client::new()
             .post(&format!("{}/subscriptions", &self.address))
@@ -85,7 +78,6 @@ impl TestApp {
     }
 
     pub async fn post_newsletters(&self, body: serde_json::Value) -> reqwest::Response {
-        let (username, password) = self.test_user().await;
         reqwest::Client::new()
             .post(&format!("{}/newsletters", &self.address))
             .basic_auth(&self.test_user.username, Some(&self.test_user.password))
@@ -105,8 +97,11 @@ impl TestUser {
         }
     }
     pub async fn store(&self, pool: &PgPool) {
-        let password_hash = sha3::Sha3_256::digest(self.password.as_bytes());
-        let password_hash = format!("{:x}", password_hash);
+        let salt = SaltString::generate(&mut rand::thread_rng());
+        let password_hash = Argon2::default()
+            .hash_password(self.password.as_bytes(), &salt)
+            .unwrap()
+            .to_string();
         sqlx::query!(
             "INSERT INTO users (user_id, username, password_hash) VALUES ($1, $2, $3)",
             self.user_id,
