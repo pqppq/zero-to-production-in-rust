@@ -16,12 +16,12 @@ tracing-actix-web = "0.7"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 serde = { version = "1", features = ["derive"] }
 config = "0.13"
-uuid = {version = "1", features = ["v4"]}
-chrono = {version = "0.4.22", features = ["clock"], default-features = false}
+uuid = { version = "1", features = ["v4"] }
+chrono = { version = "0.4.22", features = ["clock"], default-features = false }
 log = "0.4.0"
 env_logger = "0.9.0"
-tracing = {version = "0.1", features = ["log"]}
-tracing-subscriber = {version = "0.3", features= ["registry", "env-filter"]}
+tracing = { version = "0.1", features = ["log"] }
+tracing-subscriber = { version = "0.3", features = ["registry", "env-filter"] }
 tracing-bunyan-formatter = "0.3.1"
 tracing-log = "0.1"
 secrecy = { version = "0.8", features = ["serde"] }
@@ -31,6 +31,7 @@ rand = { version = "0.8.5", features = ["std_rng"] }
 validator = "0.16"
 thiserror = "1"
 anyhow = "1"
+base64 = "0.21"
 
 [dependencies.sqlx]
 version = "0.6"
@@ -38,12 +39,12 @@ default-features = false
 # feature flags
 features = [
 	"runtime-tokio-rustls", # use tokio runtime as TLS backend
-	"macros", # for sqlx::query! macro
+	"macros",               # for sqlx::query! macro
 	"postgres",
 	"uuid",
-	"chrono", # support for mappping SQL timestampz to the DateTime<T>
+	"chrono",               # support for mappping SQL timestampz to the DateTime<T>
 	"migrate",
-	"offline"
+	"offline",
 ]
 
 [dependencies.reqwest]
