@@ -61,33 +61,9 @@ impl ResponseError for LoginError {
     }
 
     fn error_response(&self) -> HttpResponse<actix_web::body::BoxBody> {
+        let encoded_error = urlencoding::Encoded::new(self.to_string());
         HttpResponse::build(self.status_code())
-            .content_type(ContentType::html())
-            .body(format!(
-                r#"
-                    <!DOCTYPE html/>
-                    <html>
-                        <head>
-                            <meta http=equiv="content-type" content="text/html; charset=utf-8">
-                            <title>Login</title>
-                        </head>
-                        <body>
-                            <p><i>{}</i></p>
-                            <form action="/login" method="post">
-                                <label for="">
-                                    Username
-                                    <input type="text" name="username" placeholder="Enter Username">
-                                </label>
-                                <label for="">
-                                    Password
-                                    <input type="text" name="password" placeholder="Enter Password">
-                                </label>
-                                <button></button>
-                            </form>
-                        </body>
-                    </html>
-                    "#,
-                self
-            ))
+            .insert_header((LOCATION, format!("/login?error={}", encoded_error)))
+            .finish()
     }
 }
