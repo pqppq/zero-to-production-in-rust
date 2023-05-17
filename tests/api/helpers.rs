@@ -167,7 +167,7 @@ pub async fn spawn_app() -> TestApp {
 
     let client = reqwest::Client::builder()
         .redirect(reqwest::redirect::Policy::none())
-        .cokie_store(true)
+        .cookie_store(true)
         .build()
         .unwrap();
 
